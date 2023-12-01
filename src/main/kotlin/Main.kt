@@ -1,7 +1,16 @@
-fun main(args: Array<String>) {
-    println("Hello World!")
+import java.io.File
 
-    // Try adding program arguments via Run/Debug configuration.
-    // Learn more about running applications: https://www.jetbrains.com/help/idea/running-applications.html.
-    println("Program arguments: ${args.joinToString()}")
+fun main() {
+    val day: AoC = Day1()
+
+    println("Exercise 1: ${day.getFirstSolution()}")
+    println("Exercise 2: ${day.getSecondSolution()}")
+}
+
+abstract class AoC(
+    filename: String
+) {
+    protected val inputData: List<String> = File("src/main/resources/$filename.txt").readLines()
+    open fun getFirstSolution(): String = "To be done"
+    open fun getSecondSolution(): String = "To be done"
 }
