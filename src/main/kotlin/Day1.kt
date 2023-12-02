@@ -3,7 +3,7 @@ import Day1.Exercise.ExerciseTwo
 
 class Day1 : AoC("day1") {
     override fun getFirstSolution(): String {
-        val result = inputData.calculateSolution {
+        val result = rawInputData.calculateSolution {
             this.getCalibrationValueForCurrentLine(ExerciseOne)
         }
 
@@ -11,7 +11,7 @@ class Day1 : AoC("day1") {
     }
 
     override fun getSecondSolution(): String {
-        val result = inputData.calculateSolution {
+        val result = rawInputData.calculateSolution {
             this.getCalibrationValueForCurrentLine(ExerciseTwo)
         }
 

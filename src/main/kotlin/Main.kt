@@ -1,7 +1,7 @@
 import java.io.File
 
 fun main() {
-    val day: AoC = Day1()
+    val day: AoC = Day2()
 
     println("Exercise 1: ${day.getFirstSolution()}")
     println("Exercise 2: ${day.getSecondSolution()}")
@@ -10,7 +10,7 @@ fun main() {
 abstract class AoC(
     filename: String
 ) {
-    protected val inputData: List<String> = File("src/main/resources/$filename.txt").readLines()
+    protected val rawInputData: List<String> = File("src/main/resources/$filename.txt").readLines()
     open fun getFirstSolution(): String = "To be done"
     open fun getSecondSolution(): String = "To be done"
 }
