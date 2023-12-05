@@ -1,4 +1,5 @@
 import Day5.Maps.*
+import kotlinx.coroutines.*
 
 class Day5 : AoC("day5") {
     override fun getFirstSolution(): String {
@@ -12,13 +13,42 @@ class Day5 : AoC("day5") {
     override fun getSecondSolution(): String {
         val (seedRangeInputData, maps) = rawInputData.parseInput()
 
-        val minimumLocationPerSeedRange = seedRangeInputData.parse()
-            .map { (seedRangeStart, seedRangeLength) ->
-                (seedRangeStart..seedRangeStart + seedRangeLength)
-                    .minOf { seed -> seed.walkThroughMapping(maps) }
+        val seedRanges = seedRangeInputData.parse()
+
+        val result = runBlocking {
+            val minimumLocationPerSeedRange = seedRanges.map { (seedRangeStart, seedRangeLength) ->
+                async(Dispatchers.Default) {
+                    (seedRangeStart..seedRangeStart + seedRangeLength)
+                        .minOf { seed -> seed.walkThroughMapping(maps) }
+                }
             }
 
-        return "Solution: ${minimumLocationPerSeedRange.min()}"
+            return@runBlocking minimumLocationPerSeedRange.awaitAll()
+                .min()
+        }
+
+        return "Solution is $result"
+    }
+
+    private fun List<Long>.parse(): List<Pair<Long, Long>> {
+        val rangeStarts = this.filterIndexed { index, _ -> index.mod(2) == 0 }
+        val rangeLengths = this.filterIndexed { index, _ -> index.mod(2) == 1 }
+
+        return rangeStarts.zip(rangeLengths)
+    }
+
+    private fun Long.walkThroughMapping(maps: Map<Maps, List<RangeMaps>>) =
+        MAPPING_PATH.map { maps[it]!!.buildMappingOperation() }
+            .fold(this) { currentValue, operation -> operation(currentValue) }
+
+    private fun List<RangeMaps>.buildMappingOperation(): (Long) -> Long  = { inputNumber: Long ->
+        val associatedRange = firstOrNull { rangeInfo ->
+            inputNumber in (rangeInfo.sourceStart..rangeInfo.sourceStart + rangeInfo.length)
+        }
+
+        associatedRange?.let { rangeInfo ->
+            rangeInfo.targetStart + inputNumber - rangeInfo.sourceStart
+        } ?: inputNumber
     }
 
     private fun List<String>.parseInput(): Pair<List<Long>, Map<Maps, List<RangeMaps>>> {
@@ -52,27 +82,6 @@ class Day5 : AoC("day5") {
         }
 
         return seeds to maps
-    }
-
-    private fun List<Long>.parse(): List<Pair<Long, Long>> {
-        val rangeStarts = this.filterIndexed { index, _ -> index.mod(2) == 0 }
-        val rangeLengths = this.filterIndexed { index, _ -> index.mod(2) == 1 }
-
-        return rangeStarts.zip(rangeLengths)
-    }
-
-    private fun Long.walkThroughMapping(maps: Map<Maps, List<RangeMaps>>) =
-        MAPPING_PATH.map { maps[it]!!.buildMappingOperation() }
-            .fold(this) { currentValue, operation -> operation(currentValue) }
-
-    private fun List<RangeMaps>.buildMappingOperation(): (Long) -> Long  = { inputNumber: Long ->
-        val associatedRange = firstOrNull { rangeInfo ->
-            inputNumber in (rangeInfo.sourceStart..rangeInfo.sourceStart + rangeInfo.length)
-        }
-
-        associatedRange?.let { rangeInfo ->
-            rangeInfo.targetStart + inputNumber - rangeInfo.sourceStart
-        } ?: inputNumber
     }
 
     data class RangeMaps(
