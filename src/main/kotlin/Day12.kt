@@ -19,9 +19,7 @@ class Day12 : AoC("day12") {
         val result = runBlocking {
             val partialResult = inputData.map {
                 async(Dispatchers.Default) {
-                    val foo = it.arrangement.countPossibleFixes(it.brokenSprings)
-                    println(foo)
-                    return@async foo
+                    it.arrangement.countPossibleFixes(it.brokenSprings)
                 }
             }
 
@@ -57,7 +55,13 @@ class Day12 : AoC("day12") {
             return if (groupInfo.isEmpty()) 1 else 0
         }
 
-        return when(this.first()) {
+        val cacheKey = this to groupInfo
+
+        if (CACHE.containsKey(cacheKey)) {
+            return CACHE[cacheKey]!!
+        }
+
+        val result = when(this.first()) {
             WORKS -> this.dropFirst().countPossibleFixes(groupInfo)
             DUNNO -> listOf(WORKS, BROKEN).sumOf {
                 this.replaceFirstWith(it).countPossibleFixes(groupInfo)
@@ -75,6 +79,10 @@ class Day12 : AoC("day12") {
                 }
             }
         }
+
+        CACHE[cacheKey] = result
+
+        return result
     }
 
     private fun List<Spring>.replaceFirstWith(spring: Spring): List<Spring> =
@@ -86,6 +94,10 @@ class Day12 : AoC("day12") {
         val brokenSprings: List<Int>,
         val arrangement: List<Spring>
     )
+
+    companion object {
+        private val CACHE = mutableMapOf<Pair<List<Spring>, List<Int>>, Long>()
+    }
 
     enum class Spring(val symbol: Char) {
         WORKS('.'),
