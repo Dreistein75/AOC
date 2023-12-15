@@ -1,7 +1,7 @@
 import java.io.File
 
 fun main() {
-    val day: AoC = Day14()
+    val day: AoC = Day15()
 
     println("Exercise 1: ${day.getFirstSolution()}")
     println("Exercise 2: ${day.getSecondSolution()}")
